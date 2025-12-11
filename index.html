@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Application météo Progressive Web App avec notifications en temps réel">
+    <meta name="theme-color" content="#16213e">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <title>MétéoPWA - Météo en temps réel</title>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>🌤️ MétéoPWA</h1>
+        <button id="theme-toggle" class="icon-btn" aria-label="Basculer le thème">
+            🌙
+        </button>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="city-input" 
+                    placeholder="Entrez une ville..."
+                    aria-label="Rechercher une ville"
+                >
+                <button id="search-btn" aria-label="Rechercher">
+                    🔍
+                </button>
+            </div>
+            <button id="notify-btn" class="notify-btn">
+                🔔 Activer les notifications
+            </button>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Chargement des données météo...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="error-message hidden"></div>
+
+        <!-- Weather Section -->
+        <section id="weather-section" class="weather-section hidden">
+            <div class="weather-header">
+                <h2 id="city-name">Ville</h2>
+                <button id="favorite-btn" class="icon-btn favorite-btn" aria-label="Ajouter aux favoris">
+                    ⭐
+                </button>
+            </div>
+
+            <div class="current-weather">
+                <div class="weather-main">
+                    <div id="weather-icon" class="weather-icon">☀️</div>
+                    <div class="temperature-display">
+                        <span id="temperature" class="temperature">0</span>
+                        <span class="temperature-unit">°C</span>
+                    </div>
+                </div>
+
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <span class="detail-label">💨 Vent</span>
+                        <span id="wind" class="detail-value">0 km/h</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">💧 Humidité</span>
+                        <span id="humidity" class="detail-value">0 %</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">🌡️ Ressenti</span>
+                        <span id="feels-like" class="detail-value">0°C</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hourly Forecast -->
+            <div class="hourly-section">
+                <h3>Prévisions horaires</h3>
+                <div id="hourly-list" class="hourly-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Favorites Section -->
+        <section id="favorites-section" class="favorites-section">
+            <h3>⭐ Mes favoris</h3>
+            <div id="favorites-list" class="favorites-list">
+                <p class="empty-message">Aucun favori pour le moment</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>Données fournies par <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>

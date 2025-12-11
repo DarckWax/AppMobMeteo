@@ -34,8 +34,20 @@ let currentCity = null;
 
 // ===== Initialisation =====
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     updateNotifyButton();
     registerServiceWorker();
+    loadFavorites();
+    renderFavorites();
+    
+    // Écouteurs d'événements
+    elements.searchBtn.addEventListener('click', handleSearch);
+    elements.cityInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSearch();
+    });
+    elements.notifyBtn.addEventListener('click', requestNotificationPermission);
+    elements.themeToggle.addEventListener('click', toggleTheme);
+    elements.favoriteBtn.addEventListener('click', handleFavoriteToggle);
 });
 
 // ===== Service Worker =====
@@ -113,7 +125,24 @@ async function requestNotificationPermission() {
 }
 
 function sendWeatherNotification(city, message, type = 'info') {
-  
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+        return;
+    }
+    
+    const options = {
+        body: message,
+        icon: 'icons/icon-192.png',
+        badge: 'icons/icon-72.png',
+        tag: `weather-${type}-${city}`,
+        vibrate: [200, 100, 200],
+        requireInteraction: false
+    };
+    
+    try {
+        new Notification(`MétéoPWA - ${city}`, options);
+    } catch (error) {
+        console.error('Erreur notification:', error);
+    }
 }
 // ===== Recherche et API Météo =====
 async function handleSearch() {
@@ -177,6 +206,9 @@ async function fetchWeather(lat, lon, cityName) {
         
         // Vérifier les alertes pour les 4 prochaines heures
         checkWeatherAlerts(weatherData, cityName);
+        
+        // Mettre à jour le bouton favori
+        updateFavoriteButton();
         
         hideLoading();
         
@@ -329,4 +361,115 @@ function showError(message) {
 
 function hideError() {
     elements.errorMessage.classList.add('hidden');
+}
+
+// ===== Dark Mode =====
+function initTheme() {
+    const savedTheme = localStorage.getItem(CONFIG.STORAGE_KEY_THEME);
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        elements.themeToggle.textContent = '☀️';
+    } else {
+        elements.themeToggle.textContent = '🌙';
+    }
+}
+
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    
+    localStorage.setItem(CONFIG.STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+    elements.themeToggle.textContent = isDark ? '☀️' : '🌙';
+}
+
+// ===== Gestion des Favoris =====
+let favorites = [];
+
+function loadFavorites() {
+    const stored = localStorage.getItem(CONFIG.STORAGE_KEY_FAVORITES);
+    favorites = stored ? JSON.parse(stored) : [];
+}
+
+function saveFavorites(favList) {
+    favorites = favList;
+    localStorage.setItem(CONFIG.STORAGE_KEY_FAVORITES, JSON.stringify(favList));
+}
+
+function renderFavorites() {
+    if (favorites.length === 0) {
+        elements.favoritesList.innerHTML = '<p class="empty-message">Aucun favori pour le moment</p>';
+        return;
+    }
+    
+    const items = favorites.map(fav => `
+        <div class="favorite-item" data-lat="${fav.lat}" data-lon="${fav.lon}" data-name="${fav.name}">
+            <span class="favorite-name">${fav.name}</span>
+            <button class="favorite-remove" data-name="${fav.name}" aria-label="Supprimer">❌</button>
+        </div>
+    `).join('');
+    
+    elements.favoritesList.innerHTML = items;
+    
+    // Écouteurs pour charger la météo
+    elements.favoritesList.querySelectorAll('.favorite-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('favorite-remove')) {
+                const lat = parseFloat(item.dataset.lat);
+                const lon = parseFloat(item.dataset.lon);
+                const name = item.dataset.name;
+                fetchWeather(lat, lon, name);
+            }
+        });
+    });
+    
+    // Écouteurs pour supprimer
+    elements.favoritesList.querySelectorAll('.favorite-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const name = btn.dataset.name;
+            const newFavorites = favorites.filter(f => f.name !== name);
+            saveFavorites(newFavorites);
+            renderFavorites();
+            updateFavoriteButton();
+        });
+    });
+}
+
+function updateFavoriteButton() {
+    if (!currentCity) {
+        elements.favoriteBtn.style.opacity = '0.5';
+        return;
+    }
+    
+    elements.favoriteBtn.style.opacity = '1';
+    const isFavorite = favorites.some(f => f.name === currentCity.name);
+    
+    if (isFavorite) {
+        elements.favoriteBtn.textContent = '⭐';
+        elements.favoriteBtn.classList.add('active');
+        elements.favoriteBtn.setAttribute('aria-label', 'Retirer des favoris');
+    } else {
+        elements.favoriteBtn.textContent = '☆';
+        elements.favoriteBtn.classList.remove('active');
+        elements.favoriteBtn.setAttribute('aria-label', 'Ajouter aux favoris');
+    }
+}
+
+function handleFavoriteToggle() {
+    if (!currentCity) return;
+    
+    const existingIndex = favorites.findIndex(f => f.name === currentCity.name);
+    
+    if (existingIndex >= 0) {
+        // Supprimer des favoris
+        const newFavorites = favorites.filter(f => f.name !== currentCity.name);
+        saveFavorites(newFavorites);
+    } else {
+        // Ajouter aux favoris
+        const newFavorites = [...favorites, currentCity];
+        saveFavorites(newFavorites);
+    }
+    
+    renderFavorites();
+    updateFavoriteButton();
 }
