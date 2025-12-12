@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Application météo Progressive Web App avec notifications en temps réel">
-    <meta name="theme-color" content="#16213e">
+    <meta name="description" content="Altus - Application météo Progressive Web App avec prévisions avancées">
+    <meta name="theme-color" content="#8808C4">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -16,12 +16,12 @@
     <!-- Styles -->
     <link rel="stylesheet" href="style.css">
     
-    <title>MétéoPWA - Météo en temps réel</title>
+    <title>Altus - Météo Avancée</title>
 </head>
 <body>
     <!-- Header -->
     <header>
-        <h1>🌤️ MétéoPWA</h1>
+        <h1>⚡ Altus</h1>
         <button id="theme-toggle" class="icon-btn" aria-label="Basculer le thème">
             🌙
         </button>
@@ -31,16 +31,20 @@
     <main class="container">
         <!-- Search Section -->
         <section class="search-section">
-            <div class="search-box">
-                <input 
-                    type="text" 
-                    id="city-input" 
-                    placeholder="Entrez une ville..."
-                    aria-label="Rechercher une ville"
-                >
-                <button id="search-btn" aria-label="Rechercher">
-                    🔍
-                </button>
+            <div class="search-box-wrapper">
+                <div class="search-box">
+                    <input 
+                        type="text" 
+                        id="city-input" 
+                        placeholder="Rechercher une ville..."
+                        aria-label="Rechercher une ville"
+                        autocomplete="off"
+                    >
+                    <button id="search-btn" aria-label="Rechercher">
+                        🔍
+                    </button>
+                </div>
+                <div id="suggestions-list" class="suggestions-list hidden"></div>
             </div>
             <button id="notify-btn" class="notify-btn">
                 🔔 Activer les notifications
@@ -63,6 +67,14 @@
                 <button id="favorite-btn" class="icon-btn favorite-btn" aria-label="Ajouter aux favoris">
                     ⭐
                 </button>
+            </div>
+
+            <!-- Day Selector -->
+            <div class="day-selector-container">
+                <h3>Sélectionner un jour</h3>
+                <div id="day-selector" class="day-selector">
+                    <!-- Populated by JS -->
+                </div>
             </div>
 
             <div class="current-weather">
@@ -92,7 +104,13 @@
 
             <!-- Hourly Forecast -->
             <div class="hourly-section">
-                <h3>Prévisions horaires</h3>
+                <div class="hourly-header">
+                    <h3>Prévisions horaires</h3>
+                    <div id="forecast-length-toggle" class="forecast-toggle">
+                        <button class="toggle-btn active" data-hours="4">4h</button>
+                        <button class="toggle-btn" data-hours="12">12h</button>
+                    </div>
+                </div>
                 <div id="hourly-list" class="hourly-list">
                     <!-- Populated by JS -->
                 </div>

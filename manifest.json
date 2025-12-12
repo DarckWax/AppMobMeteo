@@ -1,11 +1,11 @@
 {
-  "name": "MétéoPWA",
-  "short_name": "MétéoPWA",
-  "description": "Application météo Progressive Web App avec notifications et mode hors ligne",
+  "name": "Altus",
+  "short_name": "Altus",
+  "description": "Application météo Progressive Web App avec prévisions avancées et notifications",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#1a1a2e",
-  "theme_color": "#16213e",
+  "background_color": "#5E0E96",
+  "theme_color": "#8808C4",
   "orientation": "portrait-primary",
   "icons": [
     {
